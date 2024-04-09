@@ -25,13 +25,18 @@ pub async fn foo(recipient: String, body: String) -> Result<u16> {
     let my_actor = Url::parse(me).unwrap();
     let recipient_actor = Url::parse(&recipient).unwrap();
     let recipient_server: &str = recipient_actor.host_str().unwrap();
-    let user = my_actor
+    let mut user = my_actor
         .path_segments()
         .map(|c| c.collect::<Vec<_>>())
         .unwrap()
         .last()
         .unwrap()
         .clone();
+
+    if user == "" {
+        user = my_actor.host_str().unwrap().split(".").next().unwrap();
+    }
+
     let private_key_pem = get_my_privekey(user).await.unwrap();
     let date = get_current_time_in_rfc_1123().await;
     let content_type = "application/activity+json".to_string();
