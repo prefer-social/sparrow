@@ -109,10 +109,12 @@ async fn is_actor_local(actor: String) -> Result<bool> {
 }
 
 async fn clean_last_slash_from_url(c: Url) -> String {
-    if c.path() == "/" {
-        let a = format!("{:?}", &c.to_string()[..c.to_string().len() - 1]);
-        return a;
-    } else {
-        return c.to_string();
-    }
+    let a = match c.path() {
+        "/" => {
+            format!("{:?}", &c.to_string()[..c.to_string().len() - 1])
+        }
+        _ => c.to_string(),
+    };
+    println!("{}", a);
+    a
 }
