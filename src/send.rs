@@ -1,6 +1,7 @@
 //http request
 
-use crate::utils::get_current_time_in_rfc_1123;
+use std::ops::Deref;
+
 use anyhow::Result;
 use base64::{engine::general_purpose, Engine as _};
 use rsa::pkcs1v15::{Signature, SigningKey};
@@ -16,6 +17,9 @@ use spin_sdk::http::{
 use spin_sdk::sqlite::Value as SV;
 use url::Url;
 
+use crate::utils::get_current_time_in_rfc_1123;
+use crate::utils::get_privatekey_with_actor_url;
+
 pub async fn foo(recipient: String, body: String) -> Result<u16> {
     let request_body: Value = serde_json::from_str(body.as_str()).unwrap();
 
@@ -25,27 +29,22 @@ pub async fn foo(recipient: String, body: String) -> Result<u16> {
     let my_actor = Url::parse(me).unwrap();
     let recipient_actor = Url::parse(&recipient).unwrap();
     let recipient_server: &str = recipient_actor.host_str().unwrap();
-    let mut user = my_actor
-        .path_segments()
-        .map(|c| c.collect::<Vec<_>>())
-        .unwrap()
-        .last()
-        .unwrap()
-        .clone();
 
-    if user == "" {
-        user = my_actor.host_str().unwrap().split(".").next().unwrap();
-    }
+    let my_actor_id = clean_last_slash_from_url(my_actor).await;
 
-    let private_key_pem = get_my_privekey(user).await.unwrap();
+    tracing::debug!("???????????????");
+    tracing::debug!(my_actor_id);
+
+    let private_key_pem = get_privatekey_with_actor_url(my_actor_id.as_str())
+        .await
+        .unwrap();
     let date = get_current_time_in_rfc_1123().await;
     let content_type = "application/activity+json".to_string();
 
     tracing::debug!("me -> {me}");
-    tracing::debug!("my_actor -> {my_actor}");
+    tracing::debug!("my_actor -> {my_actor_id}");
     tracing::debug!("recipient_actor -> {recipient_actor}");
     tracing::debug!("recipient_server -> {recipient_server}");
-    tracing::debug!("user -> {user}");
     tracing::debug!("private_key_pem -> {private_key_pem}");
     tracing::debug!("date -> {date}");
     tracing::debug!("content_type -> {content_type}");
@@ -109,11 +108,11 @@ async fn is_actor_local(actor: String) -> Result<bool> {
     Ok(true)
 }
 
-async fn get_my_privekey(name: &str) -> Result<String> {
-    let qr = crate::db::Connection::builder().await.execute(
-    "SELECT privateKey FROM signing_key JOIN user ON user.id = signing_key.userId WHERE user.name = ?", 
-    &[SV::Text(name.to_string())]).await;
-    let private_key = qr.rows().next().unwrap().get::<&str>("privateKey").unwrap();
-    // FIXME: FIXME!
-    Ok(private_key.to_string())
+async fn clean_last_slash_from_url(c: Url) -> String {
+    if c.path() == "/" {
+        let a = format!("{:?}", &c.to_string()[..c.to_string().len() - 1]);
+        return a;
+    } else {
+        return c.to_string();
+    }
 }
