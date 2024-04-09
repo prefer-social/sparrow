@@ -6,6 +6,18 @@ use std::collections::HashMap;
 use crate::mastodon::strt::media::MediaAttachment;
 use crate::mastodon::strt::media::MediaType;
 
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AcceptedActivity {
+    #[serde(rename = "@context")]
+    pub context: String,
+    pub id: String,
+    #[serde(rename = "type")]
+    pub kind: String,
+    pub actor: String,
+    pub object: String,
+}
+
 #[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
 pub enum AcceptedTypes {
     Accept,
