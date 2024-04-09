@@ -5,6 +5,7 @@ use serde_json::Value;
 use spin_sdk::http::{HeaderValue, Method, Request, Response};
 use spin_sdk::sqlite::Value as SV;
 use std::str;
+use url::Url;
 
 pub async fn create_token() -> String {
     let pg = PasswordGenerator {
@@ -175,4 +176,15 @@ pub async fn see_headers(headers: impl Iterator<Item = (&str, &HeaderValue)>) {
     for header in headers {
         tracing::debug!("{header:?}");
     }
+}
+
+pub async fn clean_last_slash_from_url(c: Url) -> String {
+    let a = match c.path() {
+        "/" => {
+            format!("{:?}", &c.to_string()[..c.to_string().len() - 1])
+        }
+        _ => c.to_string(),
+    };
+    println!("{}", a);
+    a
 }

@@ -5,7 +5,6 @@
 use spin_sdk::sqlite::QueryResult;
 // use spin_sdk::sqlite::RowResult;
 use spin_sdk::sqlite::Value;
-use tracing::debug;
 use tracing_subscriber::{filter::EnvFilter, FmtSubscriber};
 
 #[derive(Debug)]
@@ -98,8 +97,8 @@ impl ConnectionBuilder {
     pub async fn execute(self, q: &str, query_params: &[Value]) -> QueryResult {
         match self {
             ConnectionBuilder::Local(c) => {
-                debug!(q);
-                debug!("{query_params:?}");
+                tracing::debug!(q);
+                tracing::debug!("{query_params:?}");
 
                 // https://discord.com/channels/926888690310053918/950022897160839248/1211210047489843241
                 return c

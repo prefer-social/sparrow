@@ -17,6 +17,7 @@ use spin_sdk::http::{
 use spin_sdk::sqlite::Value as SV;
 use url::Url;
 
+use crate::utils::clean_last_slash_from_url;
 use crate::utils::get_current_time_in_rfc_1123;
 use crate::utils::get_privatekey_with_actor_url;
 
@@ -106,15 +107,4 @@ pub async fn foo(recipient: String, body: String) -> Result<u16> {
 
 async fn is_actor_local(actor: String) -> Result<bool> {
     Ok(true)
-}
-
-async fn clean_last_slash_from_url(c: Url) -> String {
-    let a = match c.path() {
-        "/" => {
-            format!("{:?}", &c.to_string()[..c.to_string().len() - 1])
-        }
-        _ => c.to_string(),
-    };
-    println!("{}", a);
-    a
 }
