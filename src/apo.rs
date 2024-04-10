@@ -15,7 +15,7 @@ pub struct AcceptedActivity {
     #[serde(rename = "type")]
     pub kind: String,
     pub actor: String,
-    pub object: String,
+    pub object: Value,
 }
 
 impl AcceptedActivity {
