@@ -27,23 +27,18 @@ pub async fn foo(recipient: String, body: String) -> Result<u16> {
     let me = request_body.get("actor").unwrap().as_str().unwrap();
     tracing::debug!(me);
 
-    let my_actor = Url::parse(me).unwrap();
+    let my_actor = format!("{}", Url::parse(me).unwrap().to_string());
     let recipient_actor = Url::parse(&recipient).unwrap();
     let recipient_server: &str = recipient_actor.host_str().unwrap();
 
-    let my_actor_id = clean_last_slash_from_url(my_actor).await;
-
-    tracing::debug!("???????????????");
-    tracing::debug!(my_actor_id);
-
-    let private_key_pem = get_privatekey_with_actor_url(my_actor_id.as_str())
+    let private_key_pem = get_privatekey_with_actor_url(my_actor.clone())
         .await
         .unwrap();
     let date = get_current_time_in_rfc_1123().await;
     let content_type = "application/activity+json".to_string();
 
     tracing::debug!("me -> {me}");
-    tracing::debug!("my_actor -> {my_actor_id}");
+    tracing::debug!("my_actor -> {my_actor}");
     tracing::debug!("recipient_actor -> {recipient_actor}");
     tracing::debug!("recipient_server -> {recipient_server}");
     tracing::debug!("private_key_pem -> {private_key_pem}");
