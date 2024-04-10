@@ -95,8 +95,6 @@ pub async fn get_privatekey_with_user_name(name: &str) -> Result<String> {
 }
 
 pub async fn get_privatekey_with_actor_url(actor_url: String) -> Result<String> {
-    tracing::debug!("-------------???????????------------");
-    tracing::debug!(actor_url);
     let qr = db::Connection::builder().await.execute(
     "SELECT privateKey FROM signing_key JOIN user ON user.id = signing_key.userId WHERE user.federationId = ?", 
     &[SV::Text(actor_url)]).await;
