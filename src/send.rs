@@ -12,7 +12,8 @@ use rsa::signature::Signer;
 use rsa::RsaPrivateKey;
 use serde_json::{json, Value};
 use spin_sdk::http::{
-    self, IncomingResponse, IntoResponse, Method, Params, Request, RequestBuilder, Response,
+    self, IncomingResponse, IntoResponse, Method, Params, Request,
+    RequestBuilder, Response,
 };
 use spin_sdk::sqlite::Value as SV;
 use url::Url;
@@ -27,18 +28,17 @@ pub async fn foo(recipient: String, body: String) -> Result<u16> {
     let me = request_body.get("actor").unwrap().as_str().unwrap();
     tracing::debug!(me);
 
-    let my_actor = format!("{}", Url::parse(me).unwrap().to_string());
+    //let my_actor = format!("{}", Url::parse(me).unwrap().to_string());
     let recipient_actor = Url::parse(&recipient).unwrap();
     let recipient_server: &str = recipient_actor.host_str().unwrap();
 
-    let private_key_pem = get_privatekey_with_actor_url(my_actor.clone())
-        .await
-        .unwrap();
+    let private_key_pem =
+        get_privatekey_with_actor_url(me.to_string()).await.unwrap();
     let date = get_current_time_in_rfc_1123().await;
     let content_type = "application/activity+json".to_string();
 
     tracing::debug!("me -> {me}");
-    tracing::debug!("my_actor -> {my_actor}");
+    //tracing::debug!("my_actor -> {my_actor}");
     tracing::debug!("recipient_actor -> {recipient_actor}");
     tracing::debug!("recipient_server -> {recipient_server}");
     tracing::debug!("private_key_pem -> {private_key_pem}");
@@ -67,12 +67,15 @@ pub async fn foo(recipient: String, body: String) -> Result<u16> {
 
     // The signature string is constructed using the values of the HTTP headers defined in headers, joined by newlines. Typically, you will want to include the request target, as well as the host and the date. Mastodon assumes Date: header if none are provided. For the above GET request, to generate a Signature: with headers="(request-target) host date"
     // https://github.com/RustCrypto/RSA/issues/341
-    let private_key =
-        RsaPrivateKey::from_pkcs8_pem(&private_key_pem).expect("RsaPrivateKey creation failed");
+    let private_key = RsaPrivateKey::from_pkcs8_pem(&private_key_pem)
+        .expect("RsaPrivateKey creation failed");
     let signing_key: SigningKey<Sha256> = SigningKey::new(private_key);
-    let signature =
-        <SigningKey<Sha256> as Signer<Signature>>::sign(&signing_key, signature_string.as_bytes());
-    let encoded_signature = general_purpose::STANDARD.encode(signature.to_bytes().as_ref());
+    let signature = <SigningKey<Sha256> as Signer<Signature>>::sign(
+        &signing_key,
+        signature_string.as_bytes(),
+    );
+    let encoded_signature =
+        general_purpose::STANDARD.encode(signature.to_bytes().as_ref());
 
     let sig_header = format!(
         r#"keyId="{}#main-key",algorithm="rsa-sha256",headers="(request-target) host date digest content-type",signature="{}""#,
@@ -82,14 +85,17 @@ pub async fn foo(recipient: String, body: String) -> Result<u16> {
     tracing::debug!("sig_header --> {sig_header}");
 
     // FIXME: Need to get INBOX url from actor request.
-    let request = RequestBuilder::new(Method::Post, format!("{}/inbox", recipient_actor)) // TODO: recipient uri should get from actor.
-        .header("Date", date)
-        .header("Signature", sig_header)
-        .header("Digest", digest)
-        .header("Content-Type", &content_type)
-        .header("Accept", &content_type)
-        .body(request_body.to_string())
-        .build();
+    let request = RequestBuilder::new(
+        Method::Post,
+        format!("{}/inbox", recipient_actor),
+    ) // TODO: recipient uri should get from actor.
+    .header("Date", date)
+    .header("Signature", sig_header)
+    .header("Digest", digest)
+    .header("Content-Type", &content_type)
+    .header("Accept", &content_type)
+    .body(request_body.to_string())
+    .build();
     let response: IncomingResponse = http::send(request).await?;
     let status = response.status();
 
