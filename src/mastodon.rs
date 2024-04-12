@@ -10,14 +10,21 @@ use spin_sdk::http::Request;
 use std::collections::HashMap;
 use tracing::{debug, info};
 
-pub mod strt;
+pub mod account;
+pub mod application;
+pub mod instance;
+pub mod media;
+pub mod status;
 
 // https://github.com/RustCrypto/RSA/issues/341
 
 // TODO: Rename this to signature_verification
 // https://docs.joinmastodon.org/spec/security/#http-verify
 // https://github.com/mastodon/mastodon/blob/main/app/controllers/concerns/signature_verification.rb
-pub async fn validate_mastodon_request(req: &Request, public_key_string: &str) -> Result<bool> {
+pub async fn validate_mastodon_request(
+    req: &Request,
+    public_key_string: &str,
+) -> Result<bool> {
     let hostname = req.header("Host").unwrap().as_str().unwrap();
     let date = req.header("Date").unwrap().as_str().unwrap();
     let sig_header = req.header("Signature").unwrap().as_str().unwrap();
@@ -44,8 +51,9 @@ pub async fn validate_mastodon_request(req: &Request, public_key_string: &str) -
         query
             .split(',')
             .filter_map(|s| {
-                s.split_once('=')
-                    .and_then(|t| Some((t.0.to_owned(), rem_first_and_last(t.1).to_owned())))
+                s.split_once('=').and_then(|t| {
+                    Some((t.0.to_owned(), rem_first_and_last(t.1).to_owned()))
+                })
             })
             .collect()
     }
@@ -57,7 +65,8 @@ pub async fn validate_mastodon_request(req: &Request, public_key_string: &str) -
     let _algorithm = sig_header_map.get("algorithm").unwrap();
     //
 
-    let decoded_signature = general_purpose::STANDARD.decode(signature).unwrap();
+    let decoded_signature =
+        general_purpose::STANDARD.decode(signature).unwrap();
 
     // TODO: Generate signature string based on actual headers info got from sig_headers
     // See this: https://blog.joinmastodon.org/2018/07/how-to-make-friends-and-verify-requests/
@@ -73,9 +82,10 @@ pub async fn validate_mastodon_request(req: &Request, public_key_string: &str) -
 
     debug!("--> {signature_string}");
 
-    let public_key =
-        RsaPublicKey::from_public_key_pem(public_key_string).expect("RsaPublicKey creation failed");
-    let verifying_key_openssl: VerifyingKey<Sha256> = VerifyingKey::new(public_key.clone());
+    let public_key = RsaPublicKey::from_public_key_pem(public_key_string)
+        .expect("RsaPublicKey creation failed");
+    let verifying_key_openssl: VerifyingKey<Sha256> =
+        VerifyingKey::new(public_key.clone());
     let t = Signature::try_from(decoded_signature.as_slice()).unwrap();
     let valid_key = verifying_key_openssl
         .verify(signature_string.as_bytes(), &t)
@@ -98,11 +108,4 @@ pub async fn signing_request(req: &Request, priv_key_string: &str) {
     let content_type = req.header("content-type").unwrap().as_str().unwrap();
     let request_path = req.header("spin-path-info").unwrap().as_str().unwrap();
     let request_method = req.method().to_string();
-}
-
-pub async fn get_http_headers_map(req: &Request) {
-    let headers = req.headers();
-    for header in headers {
-        println!("{header:?}");
-    }
 }

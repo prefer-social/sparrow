@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::mastodon::strt::account::Account;
-use crate::mastodon::strt::application::Application;
+use crate::mastodon::account::Account;
+use crate::mastodon::application::Application;
 
 use super::media::MediaAttachment;
 
