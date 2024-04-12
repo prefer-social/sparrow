@@ -68,6 +68,10 @@ pub async fn get_actor_url_from_id(id: String) -> Result<String> {
     Err(anyhow!("no url available"))
 }
 
+pub async fn get_actor_url_from_acct(acc: String) -> Result<String> {
+    Ok("".to_string())
+}
+
 pub async fn get_local_user(id: i64) -> Result<(String, String)> {
     let qr = crate::db::Connection::builder().await.execute(
         "SELECT user.*, signing_key.privateKey FROM user INNER JOIN signing_key ON user.id = signing_key.userId WHERE user.id = ?",
