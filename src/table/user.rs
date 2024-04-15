@@ -5,6 +5,8 @@ use serde_derive::{Deserialize, Serialize};
 use spin_sdk::sqlite::{QueryResult, Value as SV};
 use url::Url;
 
+use crate::Identification;
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct User {
@@ -32,6 +34,16 @@ pub struct User {
 }
 
 impl User {
+    pub async fn get(name: &str) {
+        let user_handler = Identification::get(name).await;
+
+        //match user_handler {}
+        // check name
+        // acct: seungjin@seungjin.prefer.social or @seungjin@seunjgin.prefer.social
+        // actor_url: https://seungjin.prefer.social or https://seungjin.prefer.social/users/social
+        // local_username: seungjin
+    }
+
     pub async fn get_with_id(id: usize) -> Result<User> {
         todo!()
     }

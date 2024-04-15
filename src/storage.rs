@@ -23,9 +23,16 @@ curl --location --request PUT 'https://cnbbb4fp6bwv.compat.objectstorage.ap-seou
 // https://docs.aws.amazon.com/IAM/latest/UserGuide/create-signed-request.html#create-string-to-sign
 // https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
 
-pub async fn send_to_s3(file_name: String, file: &[u8]) -> Result<(String)> {
-    let (host, bucket, endpoint, region, access_key, secret_key, public_url_template) =
-        s3_info().await.unwrap();
+pub async fn send_to_s3(file_name: String, file: &[u8]) -> Result<String> {
+    let (
+        host,
+        bucket,
+        endpoint,
+        region,
+        access_key,
+        secret_key,
+        public_url_template,
+    ) = s3_info().await.unwrap();
     let endpoint = format!("https://{endpoint}/{file_name}");
     let public_url = format!("{}{}", public_url_template, file_name);
 
@@ -57,9 +64,10 @@ pub async fn send_to_s3(file_name: String, file: &[u8]) -> Result<(String)> {
 
     tracing::debug!("\n\ncanonical_request:\n{}\n\n", canonical_request);
 
-    let sha256_of_canonical_request = sha256hash_hex_encoded(canonical_request.as_bytes())
-        .await
-        .unwrap();
+    let sha256_of_canonical_request =
+        sha256hash_hex_encoded(canonical_request.as_bytes())
+            .await
+            .unwrap();
     tracing::debug!(
         "sha256_of_canonical_request: {}",
         sha256_of_canonical_request,
@@ -74,9 +82,10 @@ pub async fn send_to_s3(file_name: String, file: &[u8]) -> Result<(String)> {
     let date_region_key = hmac_sha256(date_key, region.clone().into_bytes())
         .await
         .unwrap();
-    let date_region_service_key = hmac_sha256(date_region_key, service.clone().into_bytes())
-        .await
-        .unwrap();
+    let date_region_service_key =
+        hmac_sha256(date_region_key, service.clone().into_bytes())
+            .await
+            .unwrap();
     let signing_key = hmac_sha256(
         date_region_service_key,
         "aws4_request".to_string().into_bytes(),
@@ -88,9 +97,10 @@ pub async fn send_to_s3(file_name: String, file: &[u8]) -> Result<(String)> {
         "AWS4-HMAC-SHA256\n{x_amz_date}\n{yyyymmdd}/{region}/{service}/aws4_request\n{sha256_of_canonical_request}"
     );
 
-    let signature = hmac_sha256(signing_key, string_to_sign.clone().into_bytes())
-        .await
-        .unwrap();
+    let signature =
+        hmac_sha256(signing_key, string_to_sign.clone().into_bytes())
+            .await
+            .unwrap();
 
     let signature_string = hex_encoded(signature).await.unwrap();
 
@@ -120,7 +130,7 @@ pub async fn send_to_s3(file_name: String, file: &[u8]) -> Result<(String)> {
 
     tracing::debug!("{} {}", r, r2);
 
-    Ok((public_url))
+    Ok(public_url)
 }
 
 pub async fn get_x_amz_date() -> (String, String) {
@@ -139,7 +149,8 @@ pub async fn get_x_amz_date() -> (String, String) {
 // https://stackoverflow.com/questions/67656612/how-to-compute-hmac-sha-256-for-aws-authentication
 pub async fn hmac_sha256(key: Vec<u8>, text: Vec<u8>) -> Result<Vec<u8>> {
     type HmacSha256 = SimpleHmac<Sha256>;
-    let mut mac = HmacSha256::new_from_slice(&key).expect("Error from hmac_sha256");
+    let mut mac =
+        HmacSha256::new_from_slice(&key).expect("Error from hmac_sha256");
     mac.update(&text);
     let f = mac.finalize();
     let f2 = f.into_bytes().to_vec();
@@ -173,7 +184,8 @@ impl S3Provider {
     }
 }
 
-async fn s3_info() -> Result<(String, String, String, String, String, String, String)> {
+async fn s3_info(
+) -> Result<(String, String, String, String, String, String, String)> {
     let s3_provider = variables::get("s3_provider").unwrap().to_string();
     let s = S3Provider::from_str(&s3_provider).unwrap().unwrap();
 
@@ -181,7 +193,11 @@ async fn s3_info() -> Result<(String, String, String, String, String, String, St
     match s {
         S3Provider::Aws => {
             let bucket = variables::get("s3_bucket").unwrap();
-            let host = format!("{}.{}", bucket, variables::get("s3_endpoint").unwrap());
+            let host = format!(
+                "{}.{}",
+                bucket,
+                variables::get("s3_endpoint").unwrap()
+            );
             let endpoint = format!("{}.{}", bucket, host); // AWS is virtual domain style s3 endpoint.
             let region = variables::get("s3_region").unwrap();
             let access_key = variables::get("s3_access_key").unwrap();

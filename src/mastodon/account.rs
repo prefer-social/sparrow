@@ -26,3 +26,7 @@ pub struct Account {
     pub emojis: Vec<String>,
     pub fields: Vec<String>,
 }
+
+impl Account {
+    pub async fn get(a: String) -> Self {}
+}
