@@ -1,0 +1,19 @@
+spin_manifest_version = 2
+
+[application]
+name = "sparrow"
+version = "0.1.0"
+authors = ["Seungjin Kim <seungjin@duck.com>"]
+description = ""
+
+[[trigger.http]]
+route = "/..."
+component = "sparrow"
+
+[component.sparrow]
+source = "target/wasm32-wasi/release/sparrow.wasm"
+sqlite_databases = ["default"]
+allowed_outbound_hosts = []
+[component.sparrow.build]
+command = "cargo build --target wasm32-wasi --release"
+watch = ["src/**/*.rs", "Cargo.toml"]

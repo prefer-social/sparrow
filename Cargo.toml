@@ -5,6 +5,9 @@ description = "Activitypub for wasm/wasi"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+crate-type = ["cdylib"]
+
 [dependencies]
 anyhow = "1"
 serde = { version = "1.0.193", features = ["derive"] }
@@ -61,6 +64,8 @@ hex = "0.4.3"
 hmac = "0.12.1"
 urlencoding = "2"
 hex-literal = "0.4"
+ipaddress = "0.1"
+
 
 [dev-dependencies]
 tokio = { version = "1", features = [

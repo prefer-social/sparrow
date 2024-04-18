@@ -32,10 +32,15 @@ pub struct Status {
     pub reblog: Option<String>,
     pub application: Application,
     pub account: Account,
-    pub media_attachments: Vec<MediaAttachment>,
-    pub mentions: Vec<String>,
-    pub tags: Vec<String>,
-    pub emojis: Vec<String>,
+    pub media_attachments: Option<Vec<MediaAttachment>>,
+    pub mentions: Option<Vec<String>>,
+    pub tags: Option<Vec<String>>,
+    pub emojis: Option<Vec<String>>,
     pub card: Option<String>,
     pub poll: Option<String>,
+}
+
+impl Status {
+    //whose, how many/when
+    pub async fn get(a: Account) {}
 }

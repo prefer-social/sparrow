@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use spin_sdk::{http::Request, sqlite::Value as SV};
 use tracing::{debug, info};
 
@@ -10,7 +10,10 @@ pub enum TokenAuth {
 
 // If it is valid user, return with UserId
 pub async fn check_api_auth(req: &Request) -> Result<TokenAuth> {
-    let token = req.header("Authorization").unwrap().as_str().unwrap();
+    let token = match req.header("Authorization") {
+        Some(x) => x.as_str().unwrap(),
+        None => return Ok(TokenAuth::TokenNotProvided),
+    };
     let mut a = token.split_whitespace();
     let token_type = a.next().unwrap().to_string();
     let token = a.next().unwrap().to_string();

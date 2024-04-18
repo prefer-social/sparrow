@@ -1,5 +1,3 @@
-pub mod account; 
-pub mod status;
 pub mod activitypub;
 pub mod auth;
 pub mod db;
@@ -11,6 +9,7 @@ pub mod storage;
 pub mod table;
 pub mod utils;
 pub mod postbox;
+pub mod http_response;
 
 use regex::Regex;
 
@@ -22,12 +21,22 @@ use regex::Regex;
 #[derive(Clone, Debug, PartialOrd, PartialEq, Eq, Ord)]
 pub enum Identification {
     Username(String),
+    UserId(u64),
     Account(String),
     ActorUrl(String),
+    //PublicKy(String), 
+    //Bech32(String),
 }
 
 impl Identification {
     pub async fn get(a: &str) -> Identification {
+
+        let userid_regex = Regex::new(r"^\d+$").unwrap();
+
+        match userid_regex.is_match(a) {
+            true => return Self::UserId(a.parse::<u64>().unwrap()),
+            false => (),
+        }
     
         let account_regex = 
         Regex::new(r"^([a-z0-9_+]([a-z0-9_+.]*[a-z0-9_+])?)@([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}+$)").unwrap();
@@ -50,8 +59,9 @@ impl Identification {
 
     pub async fn to_actor_url(a: Identification) -> Identification {
         match a {
-            Identification::Account(a) => Identification::Account(a),
-            Identification::Username(a) => Identification::Username(a),
+            Identification::Account(a) => todo!(),
+            Identification::Username(a) => todo!(),
+            Identification::UserId(a) => todo!(),
             Identification::ActorUrl(a) => Identification::ActorUrl(a),
         }
     }
@@ -64,6 +74,13 @@ impl Identification {
         todo!()
     }
 }
+
+
+
+
+
+
+
 
 
 #[cfg(test)]
