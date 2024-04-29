@@ -142,7 +142,7 @@ mod blackbox_test {
     pub async fn create_account() {
         
         let account = Account {
-            rowid: Some(1),
+            id: 1,
             username: "seungjin".to_string(),
             domain: Some("ap.dev.seungjin.net".to_string()),
             private_key: Some("".to_string()),
@@ -172,7 +172,7 @@ mod blackbox_test {
             shared_inbox_url: "".to_string(),
             followers_url: "https://seungjin.ap.dev.seungjin.net/followers"
                 .to_string(),
-            protocol: None,
+            protocol: 1,
             memorial: false,
             moved_to_account_id: None,
             featured_collection_url: None,
@@ -191,7 +191,7 @@ mod blackbox_test {
             trendable: None,
             reviewed_at: None,
             requested_review_at: None,
-            indexable: false,
+            indexable: Some(false),
         };
 
         //account.save().await;

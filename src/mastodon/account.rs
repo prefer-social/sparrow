@@ -66,7 +66,7 @@ impl Account {
                     .unwrap();
 
                 Account {
-                    id: account.rowid.unwrap().to_string(),
+                    id: account.id.to_string(),
                     username: account.username.clone(),
                     acct: format!(
                         "{}@{}",
@@ -106,7 +106,7 @@ impl Account {
                     .unwrap();
 
                 Account {
-                    id: account.rowid.unwrap().to_string(),
+                    id: account.id.to_string(),
                     username: account.username.clone(),
                     acct: format!(
                         "{}@{}",

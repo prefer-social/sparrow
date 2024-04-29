@@ -154,7 +154,7 @@ pub async fn get_public_key(actor_url_str: &str) -> Result<String> {
     }
 
     // TODO: Get PublicKey and check id with key_id
-    let public_key = json.get("publicKey").expect(
+    let public_key = json.get("public_key").expect(
         format!("({status:?}) publicKey not found from: {body:?}").as_str(),
     );
     let public_key_owner: &str =

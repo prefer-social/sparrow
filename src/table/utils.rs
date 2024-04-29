@@ -56,9 +56,7 @@ pub async fn hashmap_from_table(
                 "INTEGER" => {
                     //row.get::<i64>(c[0].as_str()).unwrap().to_string()
                     match row.get::<i64>(c[0].as_str()) {
-                        Some(a) => Value::Number(
-                            serde_json::Number::from_f64(a as f64).unwrap(),
-                        ),
+                        Some(a) => Value::Number(serde_json::Number::from(a)),
                         None => Value::Null,
                     }
                 }

@@ -2,8 +2,7 @@ use anyhow::Result;
 use chrono::{DateTime, Utc};
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
-use spin_sdk::sqlite::{QueryResult, Value as SV};
-use url::Url;
+use spin_sdk::sqlite::Value as SV;
 
 // == Schema Information
 //
@@ -58,10 +57,9 @@ use url::Url;
 // indexable                     :boolean          default(FALSE), not null
 
 #[derive(Default, Clone, Debug, Deserialize, Serialize, PartialEq)]
-#[serde(rename_all = "camelCase")]
 pub struct Account {
-    pub rowid: Option<i64>, // not null, primary key
-    pub username: String,   // default(""), not null
+    pub id: i64,          // not null, primary key
+    pub username: String, // default(""), not null
     pub domain: Option<String>,
     pub private_key: Option<String>,
     pub public_key: String, // default(""), not null
@@ -87,7 +85,7 @@ pub struct Account {
     pub outbox_url: String,       // default(""), not null
     pub shared_inbox_url: String, // default(""), not null
     pub followers_url: String,    // default(""), not null
-    pub protocol: Option<usize>,  // default("ostatus"), not null
+    pub protocol: i64,            // default("ostatus"), not null
     pub memorial: bool,           // default(FALSE), not null
     pub moved_to_account_id: Option<i8>,
     pub featured_collection_url: Option<String>,
@@ -98,15 +96,15 @@ pub struct Account {
     pub silenced_at: Option<DateTime<Utc>>,
     pub suspended_at: Option<DateTime<Utc>>,
     pub hide_collections: Option<bool>,
-    pub avatar_storage_schema_version: Option<usize>,
-    pub header_storage_schema_version: Option<usize>,
+    pub avatar_storage_schema_version: Option<i64>,
+    pub header_storage_schema_version: Option<i64>,
     pub devices_url: Option<String>,
-    pub suspension_origin: Option<usize>,
+    pub suspension_origin: Option<i64>,
     pub sensitized_at: Option<DateTime<Utc>>,
     pub trendable: Option<bool>,
     pub reviewed_at: Option<DateTime<Utc>>,
     pub requested_review_at: Option<DateTime<Utc>>,
-    pub indexable: bool, // default(FALSE), not null
+    pub indexable: Option<bool>, // default(FALSE), not null
 }
 
 impl Account {
@@ -177,15 +175,15 @@ impl Account {
                 .unwrap()
                 .unwrap();
 
-        //tracing::debug!("{:?}", table_hashmap);
+        for table_hashmap in table_hashmaps {
+            let foo = serde_json::to_string(&table_hashmap).unwrap();
 
-        let foo = serde_json::to_string(&table_hashmaps).unwrap();
-        //let foo2: Value = serde_json::from_str(foo.as_str()).unwrap();
+            tracing::debug!(foo);
 
-        tracing::debug!("{}", foo);
-        let account: Account = serde_json::from_str(foo.as_str()).unwrap();
+            let account: Value = serde_json::from_str(foo.as_str()).unwrap();
 
-        tracing::debug!("{:?}", account);
+            tracing::debug!("{:?}", account);
+        }
 
         Ok(())
     }
@@ -227,12 +225,12 @@ impl Account {
 
         for row in ar.rows() {
             let account = Account {
-                rowid: Some(row.get::<i64>("id").unwrap()),
+                id: row.get::<i64>("id").unwrap(),
                 username: row.get::<&str>("id").map(str::to_string).unwrap(),
                 domain: row.get::<&str>("domain").map(str::to_string), //Option<String>,
                 private_key: row.get::<&str>("privateKey").map(str::to_string),
                 public_key: row
-                    .get::<&str>("publicKey")
+                    .get::<&str>("public_key")
                     .unwrap_or("")
                     .to_string(),
                 created_at: DateTime::from_timestamp(
@@ -301,7 +299,7 @@ impl Account {
                     .get::<&str>("followersUrl")
                     .unwrap_or("")
                     .to_string(), // String,    // default(""), not null
-                protocol: row.get::<usize>("protocol"), // Option<usize>,  // default("ostatus"), not null
+                protocol: row.get::<i64>("protocol").unwrap(), // Option<usize>,  // default("ostatus"), not null
                 memorial: row.get::<bool>("memorial").unwrap_or(false), // Boolean,        // default(FALSE), not null
                 moved_to_account_id: row.get::<i8>("movedToAccountId"), // Option<i8>,
                 featured_collection_url: row
@@ -326,11 +324,11 @@ impl Account {
                 ), // Option<DateTime<Utc>>,
                 hide_collections: row.get::<bool>("updatedAt"), // Option<Boolean>,
                 avatar_storage_schema_version: row
-                    .get::<usize>("avatarStorageSchemaVersion"), // Option<usize>,
+                    .get::<i64>("avatarStorageSchemaVersion"), // Option<usize>,
                 header_storage_schema_version: row
-                    .get::<usize>("headerStorageSchemaVersion"), // Option<usize>,
+                    .get::<i64>("headerStorageSchemaVersion"), // Option<usize>,
                 devices_url: row.get::<&str>("devicesUrl").map(str::to_string), // Option<String>,
-                suspension_origin: row.get::<usize>("suspensionOrigin"),
+                suspension_origin: row.get::<i64>("suspensionOrigin"),
                 sensitized_at: DateTime::from_timestamp(
                     row.get::<i64>("sensitizedAt").unwrap(),
                     0,
@@ -344,7 +342,7 @@ impl Account {
                     row.get::<i64>("requestedReviewAt").unwrap(),
                     0,
                 ), // Option<DateTime<Utc>>,
-                indexable: row.get::<bool>("indexable").unwrap(), // Boolean, // default(FALSE), not null
+                indexable: Some(row.get::<bool>("indexable").unwrap()), // Boolean, // default(FALSE), not null
             };
         }
 
@@ -368,12 +366,12 @@ impl Account {
 
         for row in ar.rows() {
             let account = Account {
-                rowid: Some(row.get::<i64>("id").unwrap()),
+                id: row.get::<i64>("id").unwrap(),
                 username: row.get::<&str>("id").map(str::to_string).unwrap(),
                 domain: row.get::<&str>("domain").map(str::to_string), //Option<String>,
                 private_key: row.get::<&str>("privateKey").map(str::to_string),
                 public_key: row
-                    .get::<&str>("publicKey")
+                    .get::<&str>("public_key")
                     .unwrap_or("")
                     .to_string(),
                 created_at: DateTime::from_timestamp(
@@ -442,7 +440,7 @@ impl Account {
                     .get::<&str>("followersUrl")
                     .unwrap_or("")
                     .to_string(), // String,    // default(""), not null
-                protocol: row.get::<usize>("protocol"), // Option<usize>,  // default("ostatus"), not null
+                protocol: row.get::<i64>("protocol").unwrap(), // Option<usize>,  // default("ostatus"), not null
                 memorial: row.get::<bool>("memorial").unwrap_or(false), // Boolean,        // default(FALSE), not null
                 moved_to_account_id: row.get::<i8>("movedToAccountId"), // Option<i8>,
                 featured_collection_url: row
@@ -467,11 +465,11 @@ impl Account {
                 ), // Option<DateTime<Utc>>,
                 hide_collections: row.get::<bool>("updatedAt"), // Option<Boolean>,
                 avatar_storage_schema_version: row
-                    .get::<usize>("avatarStorageSchemaVersion"), // Option<usize>,
+                    .get::<i64>("avatarStorageSchemaVersion"), // Option<usize>,
                 header_storage_schema_version: row
-                    .get::<usize>("headerStorageSchemaVersion"), // Option<usize>,
+                    .get::<i64>("headerStorageSchemaVersion"), // Option<usize>,
                 devices_url: row.get::<&str>("devicesUrl").map(str::to_string), // Option<String>,
-                suspension_origin: row.get::<usize>("suspensionOrigin"),
+                suspension_origin: row.get::<i64>("suspensionOrigin"),
                 sensitized_at: DateTime::from_timestamp(
                     row.get::<i64>("sensitizedAt").unwrap(),
                     0,
@@ -485,7 +483,7 @@ impl Account {
                     row.get::<i64>("requestedReviewAt").unwrap(),
                     0,
                 ), // Option<DateTime<Utc>>,
-                indexable: row.get::<bool>("indexable").unwrap(), // Boolean, // default(FALSE), not null
+                indexable: Some(row.get::<bool>("indexable").unwrap()), // Boolean, // default(FALSE), not null
             };
         }
 

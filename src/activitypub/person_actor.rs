@@ -120,7 +120,7 @@ impl PersonActor {
             url: acct.url,
             manually_approves_followers: false, // Todo:
             discoverable: acct.discoverable.unwrap(),
-            indexable: acct.indexable,
+            indexable: acct.indexable.unwrap(),
             published: pub_date,
             memorial: Some(false),
             devices: None,
