@@ -57,11 +57,11 @@ use url::Url;
 // requested_review_at           :datetime
 // indexable                     :boolean          default(FALSE), not null
 
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Default)]
+#[derive(Default, Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct Account {
-    pub id: u64,          // not null, primary key
-    pub username: String, // default(""), not null
+    pub rowid: Option<i64>, // not null, primary key
+    pub username: String,   // default(""), not null
     pub domain: Option<String>,
     pub private_key: Option<String>,
     pub public_key: String, // default(""), not null
@@ -73,11 +73,11 @@ pub struct Account {
     pub url: Option<String>,
     pub avatar_file_name: Option<String>,
     pub avatar_content_type: Option<String>,
-    pub avatar_file_size: Option<u64>,
+    pub avatar_file_size: Option<u32>,
     pub avatar_updated_at: Option<DateTime<Utc>>,
     pub header_file_name: Option<String>,
     pub header_content_type: Option<String>,
-    pub header_file_size: Option<u64>,
+    pub header_file_size: Option<u32>,
     pub header_updated_at: Option<DateTime<Utc>>,
     pub avatar_remote_url: Option<String>,
     pub locked: bool, // default(FALSE), not null
@@ -112,9 +112,9 @@ pub struct Account {
 impl Account {
     pub async fn create_table() -> Result<()> {
         let create_stmt = r#"CREATE TABLE IF NOT EXISTS account (
-            id                            INTEGER PRIMARY KEY AUTOINCREMENT,
-            username                      TEXT DEFAULT "" NOT NULL, 
-            domain                        TEXT, 
+            id                         INTEGER PRIMARY KEY AUTOINCREMENT,
+            username                      TEXT DEFAULT "" NOT NULL,
+            domain                        TEXT,
             private_key                   TEXT,
             public_key                    TEXT DEFAULT "" NOT NULL,
             created_at                    INTEGER NOT NULL,
@@ -146,7 +146,7 @@ impl Account {
             fields                        VALUE,
             actor_type                    TEXT,
             discoverable                  BOOLEAN,
-            also_known_as                 TEXT,           
+            also_known_as                 TEXT,
             silenced_at                   INTEGER,
             suspended_at                  INTEGER,
             hide_collections              BOOLEAN,
@@ -158,7 +158,7 @@ impl Account {
             trendable                     BOOLEAN,
             reviewed_at                   INTEGER,
             requested_review_at           INTEGER,
-            indexable                     BOOLEAN 
+            indexable                     BOOLEAN
         )"#;
 
         let _create_table = crate::db::Connection::builder()
@@ -169,6 +169,44 @@ impl Account {
         // todo: do a proper thing with create_table QueryResult
         Ok(())
     }
+
+    pub async fn select() -> Result<()> {
+        let table_hashmaps =
+            crate::table::utils::hashmap_from_table("account".to_string())
+                .await
+                .unwrap()
+                .unwrap();
+
+        //tracing::debug!("{:?}", table_hashmap);
+
+        let foo = serde_json::to_string(&table_hashmaps).unwrap();
+        //let foo2: Value = serde_json::from_str(foo.as_str()).unwrap();
+
+        tracing::debug!("{}", foo);
+        let account: Account = serde_json::from_str(foo.as_str()).unwrap();
+
+        tracing::debug!("{:?}", account);
+
+        Ok(())
+    }
+
+    pub async fn insert(&self) {
+        let insert_stmt = r#"INSERT INTO account VALUES (
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ? )"#
+            .to_string();
+
+        //let a = crate::db::Connection::builder().await.executre()
+
+        //tracing::debug!("{}", self.username);
+    }
+
+    pub async fn update(&self) {}
+
+    pub async fn delete(&self) {}
 
     pub async fn get_with_username(
         username: String,
@@ -189,7 +227,7 @@ impl Account {
 
         for row in ar.rows() {
             let account = Account {
-                id: row.get::<u64>("id").unwrap(),
+                rowid: Some(row.get::<i64>("id").unwrap()),
                 username: row.get::<&str>("id").map(str::to_string).unwrap(),
                 domain: row.get::<&str>("domain").map(str::to_string), //Option<String>,
                 private_key: row.get::<&str>("privateKey").map(str::to_string),
@@ -220,7 +258,7 @@ impl Account {
                 avatar_content_type: row
                     .get::<&str>("avatarContentType")
                     .map(str::to_string),
-                avatar_file_size: row.get::<u64>("avatarContentType"),
+                avatar_file_size: row.get::<u32>("avatarContentType"),
                 avatar_updated_at: DateTime::from_timestamp(
                     row.get::<i64>("avatarUpdatedAt").unwrap(),
                     0,
@@ -231,7 +269,7 @@ impl Account {
                 header_content_type: row
                     .get::<&str>("haederContentType")
                     .map(str::to_string), // Option<String>,
-                header_file_size: row.get::<u64>("headerFileSize"), // Option<u64>,
+                header_file_size: row.get::<u32>("headerFileSize"), // Option<u64>,
                 header_updated_at: DateTime::from_timestamp(
                     row.get::<i64>("updatedAt").unwrap(),
                     0,
@@ -330,7 +368,7 @@ impl Account {
 
         for row in ar.rows() {
             let account = Account {
-                id: row.get::<u64>("id").unwrap(),
+                rowid: Some(row.get::<i64>("id").unwrap()),
                 username: row.get::<&str>("id").map(str::to_string).unwrap(),
                 domain: row.get::<&str>("domain").map(str::to_string), //Option<String>,
                 private_key: row.get::<&str>("privateKey").map(str::to_string),
@@ -361,7 +399,7 @@ impl Account {
                 avatar_content_type: row
                     .get::<&str>("avatarContentType")
                     .map(str::to_string),
-                avatar_file_size: row.get::<u64>("avatarContentType"),
+                avatar_file_size: row.get::<u32>("avatarContentType"),
                 avatar_updated_at: DateTime::from_timestamp(
                     row.get::<i64>("avatarUpdatedAt").unwrap(),
                     0,
@@ -372,7 +410,7 @@ impl Account {
                 header_content_type: row
                     .get::<&str>("haederContentType")
                     .map(str::to_string), // Option<String>,
-                header_file_size: row.get::<u64>("headerFileSize"), // Option<u64>,
+                header_file_size: row.get::<u32>("headerFileSize"), // Option<u64>,
                 header_updated_at: DateTime::from_timestamp(
                     row.get::<i64>("updatedAt").unwrap(),
                     0,

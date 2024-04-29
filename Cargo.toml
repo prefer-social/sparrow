@@ -66,7 +66,6 @@ urlencoding = "2"
 hex-literal = "0.4"
 ipaddress = "0.1"
 
-
 [dev-dependencies]
 tokio = { version = "1", features = [
     "sync",

@@ -19,7 +19,7 @@ use spin_sdk::sqlite::{QueryResult, Value as SV};
 //
 
 pub struct Follow {
-    pub id: u64,
+    pub rowid: Option<i64>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub account_id: u64,
@@ -45,7 +45,7 @@ impl Follow {
         "#;
     }
 
-    pub async fn get() {}
+    pub async fn select() {}
 
     pub async fn get_number_of_followers(account_id: u64) -> Result<u64> {
         let ar = crate::db::Connection::builder()
@@ -82,7 +82,7 @@ impl Follow {
         let mut rtn: Vec<Follow> = Vec::new();
         for row in ar.rows() {
             let follow = Follow {
-                id: row.get::<u64>("id").unwrap(),
+                rowid: row.get::<i64>("id"),
                 created_at: DateTime::from_timestamp(
                     row.get::<i64>("createdAt").unwrap(),
                     0,
@@ -116,7 +116,7 @@ impl Follow {
         let mut rtn: Vec<Follow> = Vec::new();
         for row in ar.rows() {
             let follow = Follow {
-                id: row.get::<u64>("id").unwrap(),
+                rowid: row.get::<i64>("id"),
                 created_at: DateTime::from_timestamp(
                     row.get::<i64>("createdAt").unwrap(),
                     0,
