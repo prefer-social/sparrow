@@ -20,8 +20,8 @@ watch = ["src/**/*.rs", "Cargo.toml"]
 
 [component.sparrow.tool.spin-test]
 # A relative path to where the built test component binary will live.
-source = "tests/target/wasm32-wasi/release/wasm_test.wasm"
+source = "target/wasm32-wasi/release/wasm_test.wasm"
 # A command for building the target component.
-build = "cargo component build --release"
+build = "cargo component build --release --target-dir=../target"
 # The directory where the `build` command should be run.
 dir = "./tests"

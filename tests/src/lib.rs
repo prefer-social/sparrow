@@ -8,6 +8,6 @@ use spin_test_sdk::{
 
 #[spin_test]
 fn first_test() {
-    let a = 12;
-    assert_eq!(12, a);
+    let a = "apple".to_string();
+    assert_eq!("apple".to_string(), a);
 }
