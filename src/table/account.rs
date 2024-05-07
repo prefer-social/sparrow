@@ -56,7 +56,9 @@ use spin_sdk::sqlite::Value as SV;
 // requested_review_at           :datetime
 // indexable                     :boolean          default(FALSE), not null
 
-#[derive(Default, Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(
+    Default, Clone, Debug, Deserialize, Serialize, PartialEq, sqlx::FromRow,
+)]
 pub struct Account {
     pub id: i64,          // not null, primary key
     pub username: String, // default(""), not null
@@ -177,9 +179,6 @@ impl Account {
 
         for table_hashmap in table_hashmaps {
             let foo = serde_json::to_string(&table_hashmap).unwrap();
-
-            tracing::debug!(foo);
-
             let account: Value = serde_json::from_str(foo.as_str()).unwrap();
 
             tracing::debug!("{:?}", account);

@@ -57,9 +57,11 @@ spin-sdk = { git = "https://github.com/fermyon/spin-rust-sdk", branch = "main" }
 #libsql-client = { git = "https://github.com/seungjin/libsql-client-rs", branch = "spin-rust-sdk", default-features = false, features = [
 #  "spin_backend",
 #] }
+spin-sqlx = { git = "https://github.com/seungjin/spin-sqlx", branch = "spin-sdk-main-branch" }
+sqlx = "0.7.2"
 passwords = "3.1"
 uuid = { version = "1", features = ["v4", "v7", "fast-rng", "js"] }
-validator = { version = "0.17", features = ["derive"] }
+validator = { version = "0.18", features = ["derive"] }
 hex = "0.4.3"
 hmac = "0.12.1"
 urlencoding = "2"

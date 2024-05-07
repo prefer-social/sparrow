@@ -17,3 +17,11 @@ allowed_outbound_hosts = []
 [component.sparrow.build]
 command = "cargo build --target wasm32-wasi --release"
 watch = ["src/**/*.rs", "Cargo.toml"]
+
+[component.sparrow.tool.spin-test]
+# A relative path to where the built test component binary will live.
+source = "tests/target/wasm32-wasi/release/wasm_test.wasm"
+# A command for building the target component.
+build = "cargo component build --release"
+# The directory where the `build` command should be run.
+dir = "./tests"
