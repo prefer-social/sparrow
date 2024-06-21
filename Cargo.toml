@@ -5,8 +5,8 @@ description = "Activitypub for wasm/wasi"
 version = "0.1.0"
 edition = "2021"
 
-[lib]
-crate-type = ["cdylib"]
+#[lib]
+#crate-type = ["cdylib"]
 
 [dependencies]
 anyhow = "1"
@@ -52,13 +52,10 @@ derive_builder = "0.20.0"
 async-trait = "0.1.74"
 #sha256 = { version = "1.5", default-features = false, features = [] }
 rsa = { version = "0.9", features = ["pem", "serde", "sha2"] }
-spin-sdk = { git = "https://github.com/fermyon/spin-rust-sdk", branch = "main" }
-#spin-sdk = { path = "../../../rust/spin-rust-sdk" }
-#libsql-client = { git = "https://github.com/seungjin/libsql-client-rs", branch = "spin-rust-sdk", default-features = false, features = [
-#  "spin_backend",
-#] }
-spin-sqlx = { git = "https://github.com/seungjin/spin-sqlx", branch = "spin-sdk-main-branch" }
-sqlx = "0.7.2"
+spin-sdk = { git = "https://github.com/fermyon/spin-rust-sdk.git", branch = "main" }
+#spin-sqlx = { path = "../../../rust/spin-sqlx" }
+spin-sqlx = { git = "https://github.com/seungjin/spin-sqlx.git", branch = "spin-sdk-main-branch" }
+sqlx = "0.7"
 passwords = "3.1"
 uuid = { version = "1", features = ["v4", "v7", "fast-rng", "js"] }
 validator = { version = "0.18", features = ["derive"] }
@@ -67,13 +64,3 @@ hmac = "0.12.1"
 urlencoding = "2"
 hex-literal = "0.4"
 ipaddress = "0.1"
-
-[dev-dependencies]
-tokio = { version = "1", features = [
-    "sync",
-    "macros",
-    "io-util",
-    "rt",
-    "time",
-] }
-tokio-test = "*"

@@ -7,4 +7,5 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-spin-test-sdk = { path = "../../../../rust/spin-test/crates/spin-test-sdk" }
+#spin-test-sdk = { path = "../../../../rust/spin-test/crates/spin-test-sdk" }
+spin-test-sdk = { git = "https://github.com/fermyon/spin-test.git" }

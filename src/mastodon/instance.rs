@@ -66,19 +66,19 @@ struct Polls {
 
 impl V1Instance {
     pub async fn get() -> Self {
-        let local_instance = crate::table::instance::InstanceType::Local;
-        let table =
-            crate::table::instance::Instance::get(local_instance).await;
+        // let local_instance = crate::table::instance::InstanceType::Local;
+        // let table =
+        //     crate::table::instance::Instance::get(local_instance).await;
 
-        let stats = Stats {
-            user_count: 1,
-            status_count: 1,
-            domain_count: 1,
-        };
+        // let stats = Stats {
+        //     user_count: 1,
+        //     status_count: 1,
+        //     domain_count: 1,
+        // };
 
-        let urls = Urls {
-            streaming_api: format!("wss://{}", table.domain),
-        };
+        // let urls = Urls {
+        //     streaming_api: format!("wss://{}", table.domain),
+        // };
 
         // let instance = V1Instance {
         //     uri: table.domain,
